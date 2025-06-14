@@ -1,0 +1,51 @@
+npm init -y
+npm install express pg bcrypt jsonwebtoken dotenv cors
+npm install nodemon --save-dev
+                    Explanation
+Package explanation:
+express → web server
+pg → PostgreSQL connection
+bcrypt → password encryption
+jsonwebtoken → login tokens
+dotenv → .env file for secrets
+cors → cross-origin resource sharing (React Native connection)
+nodemon → auto-restart server on changes
+                    Query for User
+
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100) UNIQUE,
+  password TEXT,
+  role VARCHAR(20), -- 'customer', 'technician', 'admin'
+  is_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+ALTER TABLE users ADD COLUMN otp VARCHAR(6);
+ALTER TABLE users ADD COLUMN otp_expires_at TIMESTAMP;
+
+📮 1. signup
+
+POST http://localhost:5000/api/auth/signup
+{
+  "name": "Qazi",
+  "email": "ddasd@gmail.com",
+  "password": "asd@asd",
+  "role": "technician"
+}
+
+📮 2. Verify OTP
+POST http://localhost:5000/api/auth/verify-otp
+{
+  "email": "ddasd@gmail.com",
+  "otp": "123456"  // 🟡 Replace this with the actual OTP from your email
+}
+
+📮 3. Login Request
+POST http://localhost:5000/api/auth/login
+{
+  "email": "ddasd@gmail.com",
+  "password": "ss@123"
+}
+if all are done they we have sussessfully generated token;
+

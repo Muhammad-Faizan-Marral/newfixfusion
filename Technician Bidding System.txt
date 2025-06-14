@@ -1,0 +1,27 @@
+| Action                               | Description                                                         |
+| ------------------------------------ | ------------------------------------------------------------------- |
+| 🛠️ Technician                       | Login ke baad posted issues dekh sakta hai                          |
+| 💰 Bid                               | Har issue pr technician bid laga sakta hai:                         |
+| `price`, `estimated_time`, `message` |                                                                     |
+| 🧾 Store                             | Bid database me save hoti hai with `technician_id` and `request_id` |
+| 👁️ User View                        | Customer dashboard me ye bids dikhai jati hain (later)              |
+
+
+🧠 1. PostgreSQL Table: bids
+
+CREATE TABLE bids (
+  id SERIAL PRIMARY KEY,
+  request_id INTEGER REFERENCES repair_requests(id),
+  technician_id INTEGER REFERENCES users(id),
+  price NUMERIC,
+  estimated_time TEXT,
+  message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+| Endpoint                    | Description               |
+| --------------------------- | ------------------------- |
+| `POST /api/bid`             | Technician places a bid   |
+| `GET /api/bids/:request_id` | Get all bids for an issue |
+
+

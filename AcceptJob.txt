@@ -1,0 +1,26 @@
+🧠 Step 1: PostgreSQL Table for Jobs
+CREATE TABLE jobs (
+  id SERIAL PRIMARY KEY,
+  request_id INTEGER REFERENCES repair_requests(id),
+  bid_id INTEGER REFERENCES bids(id),
+  customer_id INTEGER REFERENCES users(id),
+  technician_id INTEGER REFERENCES users(id),
+  status VARCHAR(20) DEFAULT 'active',  -- active | completed | cancelled
+  started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  completed_at TIMESTAMP
+);
+
+🧪 Postman Testing Guide
+✅ 1. Start Job
+POST /api/job/start
+
+json
+Copy
+Edit
+
+{
+  "request_id": 5,
+  "bid_id": 12,
+  "customer_id": 1,
+  "technician_id": 3
+}

@@ -1,0 +1,17 @@
+✅ Step 1: Update users Table
+
+ALTER TABLE users ADD COLUMN is_approved BOOLEAN DEFAULT false;
+
+
+| Method | Route                            | Description                                     |
+| ------ | -------------------------------- | ----------------------------------------------- |
+| `GET`  | `/api/admin/pending-technicians` | List all technicians with `is_approved = false` |
+| `PUT`  | `/api/admin/approve/:id`         | Approve a technician                            |
+| `PUT`  | `/api/admin/reject/:id`          | Reject (delete) a technician (optional)         |
+
+
+| Role                      | View                                |
+| ------------------------- | ----------------------------------- |
+| Technician (not approved) | “Wait for approval” screen          |
+| Admin                     | See & approve/reject technicians    |
+| Approved technician       | Can view dashboard, bid, chat, etc. |

@@ -1,0 +1,18 @@
+              🧠  PostgreSQL Table for Chat
+
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER REFERENCES users(id),
+  receiver_id INTEGER REFERENCES users(id),
+  message TEXT NOT NULL,
+  type VARCHAR(20) DEFAULT 'text', -- 'text', 'location'
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+| Event                           | Purpose                                               |
+| ------------------------------- | ----------------------------------------------------- |
+| `join_room`                     | User joins chat room based on `userID + technicianID` |
+| `send_message`                  | User sends message → saved in DB + broadcasted        |
+| `receive_message`               | Other user receives it in real-time                   |
+| `type = "text"` or `"location"` | Used to differentiate map messages                    |
+

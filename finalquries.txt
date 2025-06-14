@@ -1,0 +1,148 @@
+-- DROP TABLES in correct dependency order
+DROP TABLE IF EXISTS jobs;
+DROP TABLE IF EXISTS technician_profiles;
+DROP TABLE IF EXISTS ratings;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS bids;
+DROP TABLE IF EXISTS repair_requests;
+DROP TABLE IF EXISTS users;
+
+-- CREATE TABLE: users (base table)
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100) UNIQUE,
+  password TEXT,
+  role VARCHAR(20), -- 'customer', 'technician', 'admin'
+  is_verified BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  otp VARCHAR(6),
+  otp_expires_at TIMESTAMP
+);
+
+-- ALTER users: add approval column
+ALTER TABLE users ADD COLUMN is_approved BOOLEAN DEFAULT false;
+
+-- CREATE TABLE: repair_requests (references users)
+CREATE TABLE repair_requests (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  issue TEXT NOT NULL,
+  image TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: bids (references repair_requests, users)
+CREATE TABLE bids (
+  id SERIAL PRIMARY KEY,
+  request_id INTEGER REFERENCES repair_requests(id),
+  technician_id INTEGER REFERENCES users(id),
+  price NUMERIC,
+  estimated_time TEXT,
+  message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: messages (references users)
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER REFERENCES users(id),
+  receiver_id INTEGER REFERENCES users(id),
+  message TEXT NOT NULL,
+  type VARCHAR(20) DEFAULT 'text', -- 'text', 'location'
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: ratings (references users)
+CREATE TABLE ratings (
+  id SERIAL PRIMARY KEY,
+  technician_id INTEGER REFERENCES users(id),
+  customer_id INTEGER REFERENCES users(id),
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: technician_profiles (references users)
+CREATE TABLE technician_profiles (
+  id SERIAL PRIMARY KEY,
+  technician_id INTEGER UNIQUE REFERENCES users(id),
+  bio TEXT,
+  location TEXT,
+  skills TEXT[], -- Array of strings
+  availability TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: jobs (references users, repair_requests, bids)
+CREATE TABLE jobs (
+  id SERIAL PRIMARY KEY,
+  request_id INTEGER REFERENCES repair_requests(id),
+  bid_id INTEGER REFERENCES bids(id),
+  customer_id INTEGER REFERENCES users(id),
+  technician_id INTEGER REFERENCES users(id),
+  status VARCHAR(20) DEFAULT 'active',  -- active | completed | cancelled
+  started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  completed_at TIMESTAMP
+);
+
+
+
+
+-- SELECT Queries
+SELECT * FROM users;
+SELECT * FROM repair_requests;
+SELECT * FROM bids;
+SELECT * FROM messages;
+SELECT * FROM ratings;
+SELECT * FROM technician_profiles;
+SELECT * FROM jobs;
+
+
+
+-- ALTER messages table to add updated_at
+ALTER TABLE messages
+ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+
+-- Create function to auto-update updated_at column
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at := CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Create trigger to call the function before every update
+CREATE TRIGGER update_messages_updated_at
+BEFORE UPDATE ON messages
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+
+-- First, add the missing location_data column to messages table
+ALTER TABLE messages ADD COLUMN location_data TEXT;
+
+-- Also add is_read column for message read status
+ALTER TABLE messages ADD COLUMN is_read BOOLEAN DEFAULT false;
+
+-- Update the trigger to handle the new columns
+DROP TRIGGER IF EXISTS update_messages_updated_at ON messages;
+DROP FUNCTION IF EXISTS update_updated_at_column();
+
+-- Recreate the function
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at := CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- Recreate the trigger
+CREATE TRIGGER update_messages_updated_at
+BEFORE UPDATE ON messages
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+

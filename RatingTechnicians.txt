@@ -1,0 +1,30 @@
+| Feature          | Impact                                  |
+| ---------------- | --------------------------------------- |
+| ⭐ Average rating | Show on profile (live update)           |
+| 🔍 Search        | ML recommendations use it               |
+| 🧠 Sorting       | Top-rated technicians shown first       |
+| ❌ Low rating     | Alert admin / hide profile option later |
+
+✅ Tables Needed:
+CREATE TABLE ratings (
+  id SERIAL PRIMARY KEY,
+  technician_id INTEGER REFERENCES users(id),
+  customer_id INTEGER REFERENCES users(id),
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+| Method | Route                         | Description                                            |
+| ------ | ----------------------------- | ------------------------------------------------------ |
+| `POST` | `/api/rating`                 | Customer gives rating                                  |
+| `GET`  | `/api/rating/technician/:id`  | Get technician’s ratings                               |
+| `GET`  | `/api/technician/:id/profile` | Get profile + avg rating, feedback etc. (Later module) |
+
+
+{
+  "technician_id": 3,
+  "customer_id": 1,
+  "rating": 4,
+  "comment": "Great service!"
+}

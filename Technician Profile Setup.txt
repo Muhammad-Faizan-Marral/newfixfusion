@@ -1,0 +1,23 @@
+🧠 1. PostgreSQL Table: technician_profiles
+CREATE TABLE technician_profiles (
+  id SERIAL PRIMARY KEY,
+  technician_id INTEGER UNIQUE REFERENCES users(id),
+  bio TEXT,
+  location TEXT,
+  skills TEXT[], -- Array of strings
+  availability TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+        🧠 API ENDPOINTS
+| Method | Route                         | Description                      |
+| ------ | ----------------------------- | -------------------------------- |
+| `POST` | `/api/technician/profile`     | Create/update technician profile |
+| `GET`  | `/api/technician/:id/profile` | Get profile with rating summary  |
+
+{
+  "technician_id": 1,
+  "bio": "I fix all iPhone models with care.",
+  "location": "Lahore, Pakistan",
+  "skills": ["screen", "battery", "water damage"],
+  "availability": "Mon-Fri, 10am - 6pm"
+}

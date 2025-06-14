@@ -1,0 +1,113 @@
+-- DROP tables in correct order (if they exist)
+DROP TABLE IF EXISTS jobs;
+DROP TABLE IF EXISTS technician_profiles;
+DROP TABLE IF EXISTS ratings;
+DROP TABLE IF EXISTS messages;
+DROP TABLE IF EXISTS bids;
+DROP TABLE IF EXISTS repair_requests;
+DROP TABLE IF EXISTS users;
+
+-- CREATE TABLE: users
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100) UNIQUE,
+  password TEXT,
+  role VARCHAR(20), -- 'customer', 'technician', 'admin'
+  is_verified BOOLEAN DEFAULT false,
+  is_approved BOOLEAN DEFAULT false,
+  otp VARCHAR(6),
+  otp_expires_at TIMESTAMP,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: repair_requests
+CREATE TABLE repair_requests (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  issue TEXT NOT NULL,
+  image TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: bids
+CREATE TABLE bids (
+  id SERIAL PRIMARY KEY,
+  request_id INTEGER REFERENCES repair_requests(id),
+  technician_id INTEGER REFERENCES users(id),
+  price NUMERIC,
+  estimated_time TEXT,
+  message TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: messages
+CREATE TABLE messages (
+  id SERIAL PRIMARY KEY,
+  sender_id INTEGER REFERENCES users(id),
+  receiver_id INTEGER REFERENCES users(id),
+  message TEXT NOT NULL,
+  type VARCHAR(20) DEFAULT 'text', -- 'text', 'location'
+  location_data TEXT,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: ratings
+CREATE TABLE ratings (
+  id SERIAL PRIMARY KEY,
+  technician_id INTEGER REFERENCES users(id),
+  customer_id INTEGER REFERENCES users(id),
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: technician_profiles
+CREATE TABLE technician_profiles (
+  id SERIAL PRIMARY KEY,
+  technician_id INTEGER UNIQUE REFERENCES users(id),
+  bio TEXT,
+  location TEXT,
+  skills TEXT[], -- Array of strings
+  availability TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- CREATE TABLE: jobs
+CREATE TABLE jobs (
+  id SERIAL PRIMARY KEY,
+  request_id INTEGER REFERENCES repair_requests(id),
+  bid_id INTEGER REFERENCES bids(id),
+  customer_id INTEGER REFERENCES users(id),
+  technician_id INTEGER REFERENCES users(id),
+  status VARCHAR(20) DEFAULT 'active', -- active | completed | cancelled
+  started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  completed_at TIMESTAMP
+);
+
+-- TRIGGER FUNCTION for messages.updated_at
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at := CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+-- CREATE TRIGGER on messages table
+CREATE TRIGGER update_messages_updated_at
+BEFORE UPDATE ON messages
+FOR EACH ROW
+EXECUTE FUNCTION update_updated_at_column();
+
+-- SELECT queries to confirm everything
+SELECT * FROM users;
+SELECT * FROM repair_requests;
+SELECT * FROM bids;
+SELECT * FROM messages;
+SELECT * FROM ratings;
+SELECT * FROM technician_profiles;
+SELECT * FROM jobs;

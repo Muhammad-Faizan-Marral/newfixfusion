@@ -1,0 +1,10 @@
+fixfusion-frontend/
+├── src/
+│   ├── api/                ← Axios config
+│   ├── screens/            ← All screens (Signup, Login, etc.)
+│   ├── components/         ← Buttons, Headers, Cards
+│   ├── context/            ← AuthContext
+│   ├── navigation/         ← Stack + Tab Navigation
+│   ├── socket/             ← Socket.io setup
+│   └── utils/              ← Helpers
+├── App.js

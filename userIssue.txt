@@ -1,0 +1,30 @@
+🧠 PostgreSQL Table
+CREATE TABLE repair_requests (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id),
+  issue TEXT NOT NULL,
+  image TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+🚀 Postman Testing Guide
+            🚀 CREATE
+POST http://localhost:5000/api/customer/issue
+user_id: 1 (or logged in user ID)
+
+issue: "My phone is overheating"
+
+image: (upload an image)
+
+            🚀 GET 
+http://localhost:5000/api/customer/issues/1
+
+            🚀 PUT
+http://localhost:5000/api/customer/issues/1
+Again all steps procees when we create it first time but in this time if you make mistake firstly then now you will update
+
+          🚀 DELETE
+same api endpind
+
+Make sure user id same for Testing
+
