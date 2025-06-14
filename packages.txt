@@ -1,0 +1,39 @@
+Backend (Node.js + Express + PostgreSQL)
+express
+cors
+pg
+dotenv
+bcryptjs
+jsonwebtoken
+nodemailer
+axios
+multer
+
+📱 Frontend (React Native with Expo CLI)
+
+🔧 Installed via npx create-expo-app
+
+axios
+@react-navigation/native
+@react-navigation/native-stack
+@react-native-async-storage/async-storage
+expo-location
+
+📌 Navigation Dependencies:
+npx expo install react-native-screens react-native-safe-area-context
+npx expo install react-native-gesture-handler react-native-reanimated
+npx expo install @react-native-async-storage/async-storage
+
+ 🧠 ML Suggestion Service (Python + Flask)
+ flask
+scikit-learn
+pandas
+flask-cors
+
+
+python -m venv myenv
+# Command Prompt
+myenv\Scripts\activate
+
+ Works on all platforms and shells
+deactivate
